@@ -1,1 +1,48 @@
-<p>register works!</p>
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title>Register</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <div formGroupName="name" class="flex-row gap-1">
+        <mat-form-field>
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" placeholder="First Name">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" placeholder="Last Name">
+        </mat-form-field>
+      </div>
+
+      <div class="flex-row gap-1">
+
+        <mat-form-field>
+          <mat-label>Designation</mat-label>
+          <mat-select formControlName="designation">
+            <mat-option value="teacher">Teacher</mat-option>
+            <mat-option value="hod">HOD</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" placeholder="Email">
+        </mat-form-field>
+
+      </div>
+      <div formGroupName="passwords" class="flex-row gap-1">
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="Password">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Confirm Password</mat-label>
+          <input matInput type="password" formControlName="confirmPassword" placeholder="Confirm Password">
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" type="submit">Register</button>
+    </form>
+  </mat-card-content>
+</mat-card>
