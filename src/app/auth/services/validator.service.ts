@@ -11,20 +11,14 @@ import {
 })
 export class ValidatorService {
   constructor() {}
-  confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const group = control as FormGroup;
-      const password = group.value.password;
-      const confirmPassword = group.value.confirmPassword;
-      console.log(password, confirmPassword);
-      if (!password || !confirmPassword) {
-        return null;
-      }
-      let abc = password === confirmPassword;
-      console.log('===>', abc);
-      return password === confirmPassword
-        ? null
-        : { passwordsDoNotMatch: true };
-    };
+  confirmPasswordValidator(control: AbstractControl): ValidationErrors | null {
+    const matched: boolean =
+      control.get('password')?.value === control.get('confirmPassword')?.value;
+    if (matched) {
+      return null;
+    } else {
+      control.get('confirmPassword')?.setErrors({ passwordsDoNotMatch: true });
+    }
+    return matched ? null : { passwordsDoNotMatch: true };
   }
 }

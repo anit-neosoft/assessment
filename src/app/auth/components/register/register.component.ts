@@ -1,11 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,8 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ValidatorService } from '../../services/validator.service';
-import { CommonModule, NgIf } from '@angular/common';
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
@@ -58,7 +54,6 @@ export class RegisterComponent implements OnInit {
           }),
           confirmPassword: new FormControl('', {
             validators: [Validators.required],
-            updateOn: 'blur',
           }),
         },
         { validators: [this.validator.confirmPasswordValidator] }
