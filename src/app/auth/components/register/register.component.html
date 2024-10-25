@@ -9,10 +9,16 @@
         <mat-form-field>
           <mat-label>First Name</mat-label>
           <input matInput formControlName="firstName" placeholder="First Name">
+          @if (isFirstNameInvalid) {
+          <mat-error>Please enter a valid first name</mat-error>
+          }
         </mat-form-field>
         <mat-form-field>
           <mat-label>Last Name</mat-label>
           <input matInput formControlName="lastName" placeholder="Last Name">
+          @if (isLastNameInvalid) {
+          <mat-error>Please enter a valid last name</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -29,6 +35,9 @@
         <mat-form-field>
           <mat-label>Email</mat-label>
           <input matInput formControlName="email" placeholder="Email">
+          @if (isEmailInvalid) {
+          <mat-error>Please enter a valid email</mat-error>
+          }
         </mat-form-field>
 
       </div>
@@ -36,10 +45,16 @@
         <mat-form-field>
           <mat-label>Password</mat-label>
           <input matInput type="password" formControlName="password" placeholder="Password">
+          @if (isPasswordInvalid) {
+          <mat-error>Please enter a valid password</mat-error>
+          }
         </mat-form-field>
         <mat-form-field>
           <mat-label>Confirm Password</mat-label>
           <input matInput type="password" formControlName="confirmPassword" placeholder="Confirm Password">
+          @if (isConfirmPasswordInvalid) {
+          <mat-error>Passwords do not match</mat-error>
+          }
         </mat-form-field>
       </div>
       <button mat-raised-button color="primary" type="submit">Register</button>
