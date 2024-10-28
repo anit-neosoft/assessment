@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ValidatorService } from '../../services/validator.service';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -29,39 +30,48 @@ import { CommonModule } from '@angular/common';
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent implements OnInit {
-  constructor(private validator: ValidatorService) {}
-  form!: FormGroup;
-  ngOnInit(): void {
-    this.form = new FormGroup({
-      name: new FormGroup({
-        firstName: new FormControl('', {
-          validators: [Validators.required],
-        }),
-        lastName: new FormControl('', {
-          validators: [Validators.required],
-        }),
-      }),
-      designation: new FormControl<'teacher' | 'hod'>('teacher', {
+  // constructor(private validator: ValidatorService) {}
+  validator = inject(ValidatorService);
+  activatedRoute = inject(ActivatedRoute);
+
+  buttons = [
+    { label: 'HOD', route: '/register?userType=HOD' },
+    { label: 'Teacher', route: '/register?userType=Teacher' },
+  ];
+
+  form = new FormGroup({
+    name: new FormGroup({
+      firstName: new FormControl('', {
         validators: [Validators.required],
       }),
-      email: new FormControl('', {
-        validators: [Validators.required, Validators.email],
+      lastName: new FormControl('', {
+        validators: [Validators.required],
       }),
-      passwords: new FormGroup(
-        {
-          password: new FormControl('', {
-            validators: [Validators.required, Validators.minLength(6)],
-          }),
-          confirmPassword: new FormControl('', {
-            validators: [Validators.required],
-          }),
-        },
-        { validators: [this.validator.confirmPasswordValidator] }
-      ),
+    }),
+    designation: new FormControl<'teacher' | 'hod'>('teacher', {
+      validators: [Validators.required],
+    }),
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+    }),
+    passwords: new FormGroup(
+      {
+        password: new FormControl('', {
+          validators: [Validators.required, Validators.minLength(6)],
+        }),
+        confirmPassword: new FormControl('', {
+          validators: [Validators.required],
+        }),
+      },
+      { validators: [this.validator.confirmPasswordValidator] }
+    ),
+  });
+
+  ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      console.log('Query params', params);
     });
   }
-  // validator:any
-  // private validator = inject(ValidatorService);
 
   onSubmit() {
     console.log(

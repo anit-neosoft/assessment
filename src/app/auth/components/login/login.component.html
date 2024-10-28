@@ -3,7 +3,7 @@
     <mat-card-title> Login</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <form (ngSubmit)="onSubmit()" class="form" [formGroup]="form">
+    <form (ngSubmit)="onLogin()" class="form" [formGroup]="form">
       <mat-form-field>
         <mat-label>Email</mat-label>
         <input matInput placeholder="johndoe@abc.com" type="text" id="email" formControlName="email">

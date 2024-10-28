@@ -1,0 +1,10 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title>Register as a?</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @for (button of buttons; track button.label) {
+    <button mat-fab>{{button.label}}</button>
+    }
+  </mat-card-content>
+</mat-card>

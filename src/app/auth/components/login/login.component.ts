@@ -50,7 +50,7 @@ export class LoginComponent {
       this.form.controls.password.dirty
     );
   }
-  onSubmit() {
+  onLogin() {
     console.log(
       'Form submitted',
       this.form.value.email,
