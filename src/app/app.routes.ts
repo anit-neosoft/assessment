@@ -5,13 +5,14 @@ import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './layout/dashboard/dashboard.component';
 import { LeaveManagementComponent } from './layout/leave-management/leave-management.component';
 import { StaffManagementComponent } from './layout/staff-management/staff-management.component';
+import { AuthGuard } from './auth/guards/auth.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: '/login',
-    pathMatch: 'full',
-  },
+  // {
+  //   path: '',
+  //   redirectTo: '/login',
+  //   pathMatch: 'full',
+  // },
   {
     path: 'login',
     component: LoginComponent,
@@ -21,11 +22,12 @@ export const routes: Routes = [
     component: RegisterComponent,
   },
   {
-    path: 'layout',
+    path: '',
     component: LayoutComponent,
+    canActivate: [AuthGuard],
     children: [
       {
-        path: 'dashboard',
+        path: '',
         component: DashboardComponent,
       },
       {

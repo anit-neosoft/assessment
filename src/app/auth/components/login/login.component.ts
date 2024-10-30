@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,8 +10,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { markAllAsTouched } from '../../../helpers';
+import { Router, RouterLink } from '@angular/router';
+import { markAllAsTouched } from '../../../shared/helpers';
+import { AuthService } from '../../services/auth.service';
+import { SnackBarService } from '../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +31,10 @@ import { markAllAsTouched } from '../../../helpers';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
+  authService = inject(AuthService);
+  snackbar = inject(SnackBarService);
+  router = inject(Router);
+
   form = new FormGroup({
     username: new FormControl('', {
       validators: [Validators.required],
@@ -42,13 +48,17 @@ export class LoginComponent {
       markAllAsTouched(this.form);
       return;
     }
-    console.log(
-      'Form submitted',
-      this.form.value.username,
-      this.form.value.password
-    );
+    this.authService
+      .login(this.username.value!, this.password.value!)
+      .subscribe((user) => {
+        console.log('User logged in', user);
+        this.snackbar.open({
+          type: 'User logged in successfully',
+          actionText: 'X',
+        });
+        this.router.navigate(['']);
+      });
   }
-
   get isUsernameInvalid() {
     return (
       this.form.controls.username.touched &&
@@ -62,5 +72,11 @@ export class LoginComponent {
       this.form.controls.password.invalid &&
       this.form.controls.password.dirty
     );
+  }
+  get username() {
+    return this.form.controls.username;
+  }
+  get password() {
+    return this.form.controls.password;
   }
 }

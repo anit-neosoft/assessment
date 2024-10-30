@@ -9,7 +9,7 @@ import {
 } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, materialize, dematerialize } from 'rxjs/operators';
-import { User, UserInput } from './app/models/User';
+import { User, UserInput } from './app/shared/models/user.interface';
 
 // array in local storage for registered users
 const usersKey = 'neosoft-assessment-users';
@@ -36,8 +36,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return getUsers();
         case url.match(/\/users\/\d+$/) && method === 'GET':
           return getUserById();
-        // case url.match(/\/users\/\d+$/) && method === 'PUT':
-        //   return updateUser();
         case url.match(/\/users\/\d+$/) && method === 'DELETE':
           return deleteUser();
         default:
@@ -56,26 +54,22 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       if (!user) return error('Username or password is incorrect');
       return ok({
         ...basicDetails(user),
-        token: 'fake-jwt-token',
+        token: Math.random().toString(36).substr(2),
       });
     }
 
     function register() {
-      console.log('Registering user', body);
-
       const user: UserInput = body;
       const newUser: User = {
         ...user,
         id: users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1,
       };
-
       if (users.find((x) => x.username === user.username)) {
         return error('Username "' + user.username + '" is already taken');
       }
-
       users.push(newUser);
       localStorage.setItem(usersKey, JSON.stringify(users));
-      return ok();
+      return ok({ message: 'User registered successfully' });
     }
 
     function getUsers() {
@@ -84,29 +78,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     }
 
     function getUserById() {
-      if (!isLoggedIn()) return unauthorized();
+      // if (!isLoggedIn()) return unauthorized();
 
       const user = users.find((x) => x.id === idFromUrl());
-      return ok(basicDetails(user));
+      return ok(basicDetails(user!));
     }
-
-    // function updateUser() {
-    //   if (!isLoggedIn()) return unauthorized();
-
-    //   let params = body;
-    //   let user = users.find((x) => x.id === idFromUrl());
-
-    //   // only update password if entered
-    //   if (!params.password) {
-    //     delete params.password;
-    //   }
-
-    //   // update and save user
-    //   Object.assign(user, params);
-    //   localStorage.setItem(usersKey, JSON.stringify(users));
-
-    //   return ok();
-    // }
 
     function deleteUser() {
       if (!isLoggedIn()) return unauthorized();
@@ -137,9 +113,27 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       })).pipe(materialize(), delay(500), dematerialize());
     }
 
-    function basicDetails(user: any) {
-      const { id, username, firstName, lastName } = user;
-      return { id, username, firstName, lastName };
+    function basicDetails(user: User) {
+      const {
+        id,
+        contact,
+        department,
+        email,
+        name,
+        userType,
+        username,
+        profileImage,
+      } = user;
+      return {
+        id,
+        contact,
+        department,
+        email,
+        name,
+        userType,
+        username,
+        profileImage,
+      };
     }
 
     function isLoggedIn() {

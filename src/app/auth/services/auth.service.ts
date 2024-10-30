@@ -1,49 +1,63 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { UserInput } from '../../models/User';
-import { Observable } from 'rxjs';
-import { UserType } from '../models/UserType.enum';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+import { UserType } from '../models/user-type.enum';
+import {
+  User,
+  UserInput,
+  UserWithToken,
+} from '../../shared/models/user.interface';
+import { SnackBarService } from '../../shared/services/snackbar.service';
+import { UserService } from '../../shared/services/user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+  private snackbar = inject(SnackBarService);
+  private user = inject(UserService);
 
   isAuthenticated(): boolean {
     // Check if a token exists in local storage (or implement your logic)
     const token = localStorage.getItem('authToken');
     return !!token; // Return true if token exists, false otherwise
   }
-
-  // Implement login, logout, and token management
-  // login({email,password}:{email:string; password:string}): void {
-  //   // Do api call to /login and get the token
-  //   if()
-  //   localStorage.setItem('authToken', token); // Store the token
-  // }
-  register(): Observable<UserInput> {
-    // Do api call to /register to register a new user
-    return this.http.post<UserInput>('/users/register', {
-      name: 'Anit Singh',
-      username: 'anitsingh367',
-      email: 'anit.neosoftmail.com',
-      contact: '1234567890',
-      department: 'IT',
-      password: 'anitsingh',
-      userType: UserType.Teacher,
-      profileImage:
-        'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/855.jpg',
-    });
+  register(user: UserInput): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/users/register', user).pipe(
+      catchError((error: { message: string }) =>
+        throwError(() => {
+          this.snackbar.open({
+            type: 'There was some error while registering the user',
+            actionText: 'X',
+          });
+          return error;
+        })
+      )
+    );
+  }
+  login(username: string, password: string): Observable<User> {
+    return this.http
+      .post<UserWithToken>('/users/authenticate', { username, password })
+      .pipe(
+        tap((user: UserWithToken) => {
+          localStorage.setItem('authToken', user.token);
+          localStorage.setItem('id', user.id.toString());
+          this.user.setUser(user);
+        }),
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => {
+            this.snackbar.open({
+              type: 'There was some error while logging in',
+              actionText: 'X',
+            });
+            return error;
+          })
+        )
+      );
   }
 
   logout(): void {
     localStorage.removeItem('authToken'); // Remove the token to log out
-  }
-  getAllUsers(): void {
-    // Do api call to /users to get all users
-  }
-  getUserById(id: string): void {
-    // Do api call to /users/:id to get user by id
   }
 }
