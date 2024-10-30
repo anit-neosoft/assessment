@@ -3,6 +3,8 @@ import { LoginComponent } from './auth/components/login/login.component';
 import { RegisterComponent } from './auth/components/register/register.component';
 import { LayoutComponent } from './layout/layout.component';
 import { DashboardComponent } from './layout/dashboard/dashboard.component';
+import { LeaveManagementComponent } from './layout/leave-management/leave-management.component';
+import { StaffManagementComponent } from './layout/staff-management/staff-management.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +27,14 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: DashboardComponent,
+      },
+      {
+        path: 'staff-management',
+        component: StaffManagementComponent,
+      },
+      {
+        path: 'leave-management',
+        component: LeaveManagementComponent,
       },
     ],
   },

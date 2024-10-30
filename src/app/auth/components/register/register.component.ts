@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { ValidatorService } from '../../services/validator.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Params, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { markAllAsTouched } from '../../../helpers';
 
 @Component({
   selector: 'app-register',
@@ -33,6 +35,7 @@ import { ActivatedRoute, Params, RouterModule } from '@angular/router';
 export class RegisterComponent implements OnInit {
   validator = inject(ValidatorService);
   activatedRoute = inject(ActivatedRoute);
+  authService = inject(AuthService);
 
   buttons = [
     { label: 'HOD', route: '/register?userType=HOD' },
@@ -67,7 +70,6 @@ export class RegisterComponent implements OnInit {
     ),
     profileImage: new FormControl('', [Validators.required]),
   });
-  srcResult: any;
 
   ngOnInit(): void {
     this.activatedRoute.queryParams.subscribe((params) => {
@@ -77,12 +79,18 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.form.invalid) {
+      markAllAsTouched(this.form);
+      return;
+    }
+    this.authService.register().subscribe((user) => {
+      console.log('User registered', user);
+    });
     console.log(
       'Form submitted',
       // this.isConfirmPasswordInvalid,
       this.passwords.hasError('passwordsDoNotMatch')
     );
-
   }
   get userType() {
     return this.queryParam?.['userType'];
@@ -177,8 +185,7 @@ export class RegisterComponent implements OnInit {
       const reader = new FileReader();
 
       reader.onload = (e: any) => {
-        this.srcResult = e.target.result;
-        this.form.controls.profileImage.setValue(this.srcResult);
+        this.form.controls.profileImage.setValue(e.target.result);
       };
 
       reader.readAsArrayBuffer(inputNode.files[0]);

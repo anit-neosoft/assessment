@@ -35,11 +35,11 @@ export class LayoutComponent {
       shareReplay()
     );
   sideBarLinks = [
-    { name: 'Dashboard', route: '/dashboard' },
+    { name: 'Dashboard', route: '/layout/dashboard' },
     {
       name: 'Staff Management',
-      route: '/staff-management',
+      route: '/layout/staff-management',
     },
-    { name: 'Leave Management', route: '/leave-management' },
+    { name: 'Leave Management', route: '/layout/leave-management' },
   ];
 }

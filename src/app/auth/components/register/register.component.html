@@ -73,7 +73,7 @@
           <mat-label>Password</mat-label>
           <input matInput type="password" formControlName="password" placeholder="Password">
           @if (isPasswordInvalid) {
-          <mat-error>Please enter a valid password</mat-error>
+          <mat-error>Please enter a valid password (atleast 6 characters long)</mat-error>
           }
         </mat-form-field>
         <mat-form-field>
@@ -84,9 +84,9 @@
           }
         </mat-form-field>
       </div>
-      <div class="flex-row gap-1 align-items-center">
+      <div class="flex-row gap-1 align-items-center mt-1">
         <mat-label for="fileInput">Profile Picture</mat-label>
-        <button type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
+        <button type="button" mat-flat-button color="secondary" (click)="fileInput.click()">Choose File</button>
         <input hidden (change)="onFileSelected()" #fileInput type="file" id="file">
       </div>
       <button mat-raised-button color="primary" type="submit" style="margin-top: 8px;">Register</button>

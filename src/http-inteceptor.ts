@@ -9,10 +9,11 @@ import {
 } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, materialize, dematerialize } from 'rxjs/operators';
+import { User, UserInput } from './app/models/User';
 
 // array in local storage for registered users
 const usersKey = 'neosoft-assessment-users';
-let users: any[] = JSON.parse(localStorage.getItem(usersKey)!) || [];
+let users: User[] = JSON.parse(localStorage.getItem(usersKey)!) || [];
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -21,6 +22,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     const { url, method, headers, body } = request;
+    console.log('Request', request);
 
     return handleRoute();
 
@@ -34,8 +36,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return getUsers();
         case url.match(/\/users\/\d+$/) && method === 'GET':
           return getUserById();
-        case url.match(/\/users\/\d+$/) && method === 'PUT':
-          return updateUser();
+        // case url.match(/\/users\/\d+$/) && method === 'PUT':
+        //   return updateUser();
         case url.match(/\/users\/\d+$/) && method === 'DELETE':
           return deleteUser();
         default:
@@ -59,14 +61,19 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     }
 
     function register() {
-      const user = body;
+      console.log('Registering user', body);
+
+      const user: UserInput = body;
+      const newUser: User = {
+        ...user,
+        id: users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1,
+      };
 
       if (users.find((x) => x.username === user.username)) {
         return error('Username "' + user.username + '" is already taken');
       }
 
-      user.id = users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1;
-      users.push(user);
+      users.push(newUser);
       localStorage.setItem(usersKey, JSON.stringify(users));
       return ok();
     }
@@ -83,23 +90,23 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return ok(basicDetails(user));
     }
 
-    function updateUser() {
-      if (!isLoggedIn()) return unauthorized();
+    // function updateUser() {
+    //   if (!isLoggedIn()) return unauthorized();
 
-      let params = body;
-      let user = users.find((x) => x.id === idFromUrl());
+    //   let params = body;
+    //   let user = users.find((x) => x.id === idFromUrl());
 
-      // only update password if entered
-      if (!params.password) {
-        delete params.password;
-      }
+    //   // only update password if entered
+    //   if (!params.password) {
+    //     delete params.password;
+    //   }
 
-      // update and save user
-      Object.assign(user, params);
-      localStorage.setItem(usersKey, JSON.stringify(users));
+    //   // update and save user
+    //   Object.assign(user, params);
+    //   localStorage.setItem(usersKey, JSON.stringify(users));
 
-      return ok();
-    }
+    //   return ok();
+    // }
 
     function deleteUser() {
       if (!isLoggedIn()) return unauthorized();

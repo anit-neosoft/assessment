@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { markAllAsTouched } from '../../../helpers';
 
 @Component({
   selector: 'app-login',
@@ -29,18 +30,30 @@ import { RouterLink } from '@angular/router';
 })
 export class LoginComponent {
   form = new FormGroup({
-    email: new FormControl('', {
-      validators: [Validators.required, Validators.email],
+    username: new FormControl('', {
+      validators: [Validators.required],
     }),
     password: new FormControl('', {
       validators: [Validators.required, Validators.minLength(6)],
     }),
   });
-  get isEmailInvalid() {
+  onLogin() {
+    if (this.form.invalid) {
+      markAllAsTouched(this.form);
+      return;
+    }
+    console.log(
+      'Form submitted',
+      this.form.value.username,
+      this.form.value.password
+    );
+  }
+
+  get isUsernameInvalid() {
     return (
-      this.form.controls.email.touched &&
-      this.form.controls.email.invalid &&
-      this.form.controls.email.dirty
+      this.form.controls.username.touched &&
+      this.form.controls.username.invalid &&
+      this.form.controls.username.dirty
     );
   }
   get isPasswordInvalid() {
@@ -48,13 +61,6 @@ export class LoginComponent {
       this.form.controls.password.touched &&
       this.form.controls.password.invalid &&
       this.form.controls.password.dirty
-    );
-  }
-  onLogin() {
-    console.log(
-      'Form submitted',
-      this.form.value.email,
-      this.form.value.password
     );
   }
 }

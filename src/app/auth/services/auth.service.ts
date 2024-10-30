@@ -1,5 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { UserInput } from '../../models/User';
+import { Observable } from 'rxjs';
+import { UserType } from '../models/UserType.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -19,22 +22,19 @@ export class AuthService {
   //   if()
   //   localStorage.setItem('authToken', token); // Store the token
   // }
-  register(): void {
+  register(): Observable<UserInput> {
     // Do api call to /register to register a new user
-    this.http
-      .post('http://localhost:3000/register', {
-        name: 'Anit Singh',
-        username: 'anitsingh367',
-        email: 'anit.neosoftmail.com',
-        contactNumber: '1234567890',
-        department: 0,
-        password: 'anitsingh',
-        profileImage:
-          'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/855.jpg',
-      })
-      .subscribe((data) => {
-        console.log(data);
-      });
+    return this.http.post<UserInput>('/users/register', {
+      name: 'Anit Singh',
+      username: 'anitsingh367',
+      email: 'anit.neosoftmail.com',
+      contact: '1234567890',
+      department: 'IT',
+      password: 'anitsingh',
+      userType: UserType.Teacher,
+      profileImage:
+        'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/855.jpg',
+    });
   }
 
   logout(): void {

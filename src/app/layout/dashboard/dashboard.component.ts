@@ -7,6 +7,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { map } from 'rxjs';
+import { StatCardComponent } from "../../components/stat-card/stat-card.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +19,8 @@ import { map } from 'rxjs';
     MatIconModule,
     MatButtonModule,
     MatCardModule,
-  ],
+    StatCardComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
