@@ -1,13 +1,14 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { map } from 'rxjs';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
+import { UserService } from '../../shared/services/user.service';
+import { UserType } from '../../auth/models/user-type.enum';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,27 +25,21 @@ import { StatCardComponent } from '../../shared/components/stat-card/stat-card.c
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+export class DashboardComponent implements OnInit {
+  private user = inject(UserService);
+  hodStatCards = ['Total Staff Members'];
+  staffStatCards = [
+    'Total Leaves',
+    'Total Approved Leaves',
+    'Total Rejected Leaves',
+  ];
+  userType!: string;
 
-  /** Based on the screen size, switch from standard to one column per row */
-  cards = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-    map(({ matches }) => {
-      if (matches) {
-        return [
-          { title: 'Card 1', cols: 1, rows: 1 },
-          { title: 'Card 2', cols: 1, rows: 1 },
-          { title: 'Card 3', cols: 1, rows: 1 },
-          { title: 'Card 4', cols: 1, rows: 1 },
-        ];
+  ngOnInit(): void {
+    this.user.getUser().subscribe((user) => {
+      if (user?.userType !== undefined) {
+        this.userType = UserType[parseInt(user.userType)];
       }
-
-      return [
-        { title: 'Card 1', cols: 2, rows: 1 },
-        { title: 'Card 2', cols: 1, rows: 1 },
-        { title: 'Card 3', cols: 1, rows: 2 },
-        { title: 'Card 4', cols: 1, rows: 1 },
-      ];
-    })
-  );
+    });
+  }
 }

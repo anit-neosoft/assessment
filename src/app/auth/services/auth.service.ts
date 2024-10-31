@@ -56,7 +56,6 @@ export class AuthService {
         )
       );
   }
-
   logout(): void {
     localStorage.removeItem('authToken'); // Remove the token to log out
   }

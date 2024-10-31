@@ -6,13 +6,9 @@ import { DashboardComponent } from './layout/dashboard/dashboard.component';
 import { LeaveManagementComponent } from './layout/leave-management/leave-management.component';
 import { StaffManagementComponent } from './layout/staff-management/staff-management.component';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { TeachersGuard } from './shared/teachers-guard.guard';
 
 export const routes: Routes = [
-  // {
-  //   path: '',
-  //   redirectTo: '/login',
-  //   pathMatch: 'full',
-  // },
   {
     path: 'login',
     component: LoginComponent,
@@ -28,11 +24,17 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
         component: DashboardComponent,
       },
       {
         path: 'staff-management',
         component: StaffManagementComponent,
+        canActivate: [TeachersGuard],
       },
       {
         path: 'leave-management',

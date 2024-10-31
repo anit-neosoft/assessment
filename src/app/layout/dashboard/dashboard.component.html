@@ -25,7 +25,14 @@
   </mat-grid-list>
 </div> -->
 <div class="flex flex-row justify-content-center">
+  @if(userType === 'HOD'){
+  @for (card of hodStatCards; track card) {
   <app-stat-card />
+  }
+  }
+  @else {
+  @for (card of staffStatCards; track card) {
   <app-stat-card />
-  <app-stat-card />
+  }
+  }
 </div>

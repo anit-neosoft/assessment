@@ -9,6 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Observable, map, shareReplay } from 'rxjs';
 import { UserService } from '../shared/services/user.service';
+import { UserType } from '../auth/models/user-type.enum';
 
 @Component({
   selector: 'app-layout',
@@ -30,25 +31,31 @@ export class LayoutComponent implements OnInit {
   private breakpointObserver = inject(BreakpointObserver);
   private user = inject(UserService);
 
-  userName: string = '';
+  userName$: Observable<string> = this.user
+    .getUser()
+    .pipe(map((user) => user?.name || ''));
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
       map((result) => result.matches),
       shareReplay()
     );
+  userType!: string;
   sideBarLinks = [
-    { name: 'Dashboard', route: '/layout/dashboard' },
-    {
-      name: 'Staff Management',
-      route: '/layout/staff-management',
-    },
-    { name: 'Leave Management', route: '/layout/leave-management' },
+    { name: 'Dashboard', route: '/dashboard' },
+    { name: 'Leave Management', route: '/leave-management' },
   ];
   ngOnInit(): void {
-    const user = this.user.getUser();
-    if (user) {
-      this.userName = user.name;
-    }
+    this.user.getUser().subscribe((user) => {
+      if (user?.userType !== undefined) {
+        this.userType = UserType[parseInt(user.userType)];
+        if (this.userType === 'HOD') {
+          this.sideBarLinks.splice(1, 0, {
+            name: 'Staff Management',
+            route: '/staff-management',
+          });
+        }
+      }
+    });
   }
 }
