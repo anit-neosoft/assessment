@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { User } from '../models/user.interface';
+import { User, UserWithToken } from '../models/user.interface';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 
@@ -7,14 +7,22 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class UserService {
-  private user = new BehaviorSubject<User | undefined>(undefined);
+  private user = new BehaviorSubject<UserWithToken | undefined>(undefined);
   private http = inject(HttpClient);
+  constructor() {
+    // Load user from localStorage on initialization
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      this.user.next(JSON.parse(userData));
+    }
+  }
 
-  setUser(user: User) {
+  setUser(user: UserWithToken) {
     this.user.next(user);
   }
   getUser() {
-    return this.user.asObservable();
+    return (this.user.value ||
+      JSON.parse(localStorage.getItem('user') || 'null')) as UserWithToken;
   }
   getUserId(id: string) {
     return this.http.get<User>(`/users/${id}`);

@@ -20,8 +20,10 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     // Check if a token exists in local storage (or implement your logic)
-    const token = localStorage.getItem('authToken');
-    return !!token; // Return true if token exists, false otherwise
+    const user = JSON.parse(
+      localStorage.getItem('user') || 'null'
+    ) as UserWithToken | null;
+    return !!user?.token; // Return true if token exists, false otherwise
   }
   register(user: UserInput): Observable<{ message: string }> {
     return this.http.post<{ message: string }>('/users/register', user).pipe(
@@ -41,8 +43,7 @@ export class AuthService {
       .post<UserWithToken>('/users/authenticate', { username, password })
       .pipe(
         tap((user: UserWithToken) => {
-          localStorage.setItem('authToken', user.token);
-          localStorage.setItem('id', user.id.toString());
+          localStorage.setItem('user', JSON.stringify(user));
           this.user.setUser(user);
         }),
         catchError((error: HttpErrorResponse) =>
@@ -57,6 +58,6 @@ export class AuthService {
       );
   }
   logout(): void {
-    localStorage.removeItem('authToken'); // Remove the token to log out
+    localStorage.removeItem('user'); // Remove the token to log out
   }
 }

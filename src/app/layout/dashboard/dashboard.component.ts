@@ -25,7 +25,7 @@ import { UserType } from '../../auth/models/user-type.enum';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private user = inject(UserService);
   hodStatCards = ['Total Staff Members'];
   staffStatCards = [
@@ -33,13 +33,13 @@ export class DashboardComponent implements OnInit {
     'Total Approved Leaves',
     'Total Rejected Leaves',
   ];
-  userType!: string;
+  userType: string = UserType[parseInt(this.user.getUser().userType)];
 
-  ngOnInit(): void {
-    this.user.getUser().subscribe((user) => {
-      if (user?.userType !== undefined) {
-        this.userType = UserType[parseInt(user.userType)];
-      }
-    });
-  }
+  // ngOnInit(): void {
+  //   this.user.getUser().subscribe((user) => {
+  //     if (user?.userType !== undefined) {
+  //       this.userType = UserType[parseInt(user.userType)];
+  //     }
+  //   });
+  // }
 }

@@ -27,13 +27,13 @@ import { UserType } from '../auth/models/user-type.enum';
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private user = inject(UserService);
 
-  userName$: Observable<string> = this.user
-    .getUser()
-    .pipe(map((user) => user?.name || ''));
+  // userName$: Observable<string> = this.user
+  //   .getUser()
+  //   .pipe(map((user) => user?.name || ''));
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
@@ -45,17 +45,17 @@ export class LayoutComponent implements OnInit {
     { name: 'Dashboard', route: '/dashboard' },
     { name: 'Leave Management', route: '/leave-management' },
   ];
-  ngOnInit(): void {
-    this.user.getUser().subscribe((user) => {
-      if (user?.userType !== undefined) {
-        this.userType = UserType[parseInt(user.userType)];
-        if (this.userType === 'HOD') {
-          this.sideBarLinks.splice(1, 0, {
-            name: 'Staff Management',
-            route: '/staff-management',
-          });
-        }
-      }
-    });
-  }
+  // ngOnInit(): void {
+  //   this.user.getUser().subscribe((user) => {
+  //     if (user?.userType !== undefined) {
+  //       this.userType = UserType[parseInt(user.userType)];
+  //       if (this.userType === 'HOD') {
+  //         this.sideBarLinks.splice(1, 0, {
+  //           name: 'Staff Management',
+  //           route: '/staff-management',
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
 }
