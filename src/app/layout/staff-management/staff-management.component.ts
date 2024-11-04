@@ -17,17 +17,13 @@ export class StaffManagementComponent {
     {
       header: 'Employee Name',
       field: 'name',
-      hide: this.userType === UserType.Teacher,
     },
     {
-      header: 'Email',
-      field: 'email',
-      hide: this.userType === UserType.Teacher,
+      header: 'Username',
+      field: 'username',
     },
-    { header: 'From Date', field: 'from' },
-    { header: 'To Date', field: 'to-date' },
-    { header: 'Reason', field: 'reason' },
-    { header: 'Status', field: 'status', hide: this.userType === UserType.HOD },
+    { header: 'Email', field: 'email' },
+    { header: 'Mobile', field: 'mobile' },
     {
       header: 'Action',
       field: 'action',
@@ -42,8 +38,16 @@ export class StaffManagementComponent {
             console.log('View', record);
           },
         },
+        {
+          type: 'icon',
+          text: 'Delete',
+          icon: 'delete',
+          tooltip: 'Delete',
+          click: (record) => {
+            console.log('Delete', record);
+          },
+        },
       ],
-      hide: this.userType === UserType.HOD,
     },
   ];
   get userType() {

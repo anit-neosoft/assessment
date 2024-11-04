@@ -9,8 +9,8 @@ import { ApplyLeave } from '../models/apply-leave';
 })
 export class ApplyLeaveService {
   private http = inject(HttpClient);
-  private user = inject(UserService);
   private snackbar = inject(SnackBarService);
+
   applyLeave(leave: ApplyLeave) {
     return this.http.post<{ message: string }>('/apply-leave', leave).pipe(
       catchError((error: { message: string }) =>

@@ -1,9 +1,14 @@
-import { UserWithToken } from '../../../models/user.interface';
-
 export interface ApplyLeave {
-  fromDate: string | null | undefined;
-  toDate: string | null | undefined;
-  reason: string | null | undefined;
-  status: string;
-  user: UserWithToken;
+  fromDate: string;
+  toDate: string;
+  reason: string;
+  status: LeaveStatus;
+  leaveId?: number;
+  userId: number;
+  department: string;
+}
+export enum LeaveStatus {
+  Approved = 0,
+  Rejected,
+  Pending,
 }

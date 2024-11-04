@@ -10,12 +10,16 @@ import {
 import { Observable, of, throwError } from 'rxjs';
 import { delay, materialize, dematerialize } from 'rxjs/operators';
 import { User, UserInput } from './app/shared/models/user.interface';
+import {
+  ApplyLeave,
+  LeaveStatus,
+} from './app/shared/components/apply-leave/models/apply-leave';
 
 // array in local storage for registered users
 const usersKey = 'neosoft-assessment-users';
 const leaveKey = 'neosoft-assessment-leaves';
 let users: User[] = JSON.parse(localStorage.getItem(usersKey)!) || [];
-let leaves: any[] = JSON.parse(localStorage.getItem(leaveKey)!) || [];
+let leaves: ApplyLeave[] = JSON.parse(localStorage.getItem(leaveKey)!) || [];
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -42,6 +46,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         //   return deleteUser();
         case url.endsWith('/apply-leave') && method === 'POST':
           return applyLeave();
+        case url.match('/leave-management/hod') && method === 'POST':
+          return getLeaveManagementDetail();
         default:
           // pass through any requests not handled above
           return next.handle(request);
@@ -76,14 +82,36 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return ok({ message: 'User registered successfully' });
     }
     function applyLeave() {
-      const leave = body;
-      const newLeave = {
+      const leave: ApplyLeave = body;
+      const newLeave: ApplyLeave = {
         ...leave,
-        id: leaves.length ? Math.max(...leaves.map((x) => x.id)) + 1 : 1,
+        leaveId: leaves.length
+          ? Math.max(...leaves.map((x) => x.leaveId || 0)) + 1
+          : 1,
       };
       leaves.push(newLeave);
       localStorage.setItem(leaveKey, JSON.stringify(leaves));
       return ok({ message: 'Leave applied successfully' });
+    }
+    function getLeaveManagementDetail() {
+      const { department } = body;
+      const pendingLeaves = leaves.filter(
+        (x) => x.department === department && x.status === LeaveStatus.Pending
+      );
+      pendingLeaves.forEach((leave) => {
+        const user = users.find((x) => x.id === leave.userId);
+        return {
+          name: `${user?.firstName} ${user?.lastName}`,
+          email: user?.email,
+          fromDate: leave.fromDate,
+          toDate: leave.toDate,
+          reason: leave.reason,
+          status: leave.status,
+          leaveId: leave.leaveId,
+          userId: leave.userId,
+        };
+      });
+      return ok(pendingLeaves);
     }
 
     // function getUsers() {
@@ -92,19 +120,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     // }
 
     function getUserById() {
-      // if (!isLoggedIn()) return unauthorized();
-
       const user = users.find((x) => x.id === idFromUrl());
       return ok(basicDetails(user!));
     }
 
-    // function deleteUser() {
-    //   if (!isLoggedIn()) return unauthorized();
-
-    //   users = users.filter((x) => x.id !== idFromUrl());
-    //   localStorage.setItem(usersKey, JSON.stringify(users));
-    //   return ok();
-    // }
+    function deleteUser() {
+      users = users.filter((x) => x.id !== idFromUrl());
+      localStorage.setItem(usersKey, JSON.stringify(users));
+      return ok();
+    }
 
     // helper functions
 

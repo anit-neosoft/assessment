@@ -26,6 +26,7 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { LeaveStatus } from './models/apply-leave';
 
 @Component({
   selector: 'app-apply-leave',
@@ -76,11 +77,12 @@ export class ApplyLeaveComponent {
   }
   createLeaveObject() {
     return {
-      fromDate: this.leaveForm.get('fromDate')?.value,
-      toDate: this.leaveForm.get('toDate')?.value,
-      reason: this.leaveForm.get('reason')?.value,
-      status: 'pending',
-      user: this.user.getUser(),
+      fromDate: this.leaveForm.controls.fromDate.value || '',
+      toDate: this.leaveForm.controls.toDate.value || '',
+      reason: this.leaveForm.controls.reason.value || '',
+      status: LeaveStatus.Pending,
+      userId: this.user.getUser().id,
+      department: this.user.getUser().department,
     };
   }
   onCancelClick() {
