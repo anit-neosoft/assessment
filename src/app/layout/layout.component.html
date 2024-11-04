@@ -18,11 +18,14 @@
         }
         <span>Welcome {{firstName}}</span>
       </div>
-      <span>
+      <span class="flex-row align-items-center gap-1">
         <button mat-raised-button (click)="openDialog()">
           <mat-icon>add</mat-icon>
           <span>{{isUserHOD ? "Add Staff" : "Apply Leave"}}</span>
         </button>
+        <mat-icon matTooltip="Logout" (click)="logout()" class="curosor-pointer">
+          power_settings_new
+        </mat-icon>
       </span>
     </mat-toolbar>
     <router-outlet></router-outlet>

@@ -27,4 +27,8 @@ export class UserService {
   getUserId(id: string) {
     return this.http.get<User>(`/users/${id}`);
   }
+  logout() {
+    this.user.next(undefined);
+    localStorage.removeItem('user');
+  }
 }

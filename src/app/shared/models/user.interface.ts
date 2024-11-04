@@ -1,5 +1,3 @@
-import { UserType } from '../../auth/models/user-type.enum';
-
 export interface UserInput {
   firstName: string;
   lastName: string;

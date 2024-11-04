@@ -6,13 +6,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Observable, map, shareReplay } from 'rxjs';
 import { UserService } from '../shared/services/user.service';
 import { UserType } from '../auth/models/user-type.enum';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ApplyLeaveComponent } from '../shared/components/apply-leave/apply-leave.component';
 import { RegisterComponent } from '../auth/components/register/register.component';
+import { ComponentType } from '@angular/cdk/portal';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-layout',
@@ -27,6 +29,7 @@ import { RegisterComponent } from '../auth/components/register/register.componen
     RouterOutlet,
     RouterLink,
     MatDialogModule,
+    MatTooltipModule,
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
@@ -35,6 +38,7 @@ export class LayoutComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private user = inject(UserService);
   readonly dialog = inject(MatDialog);
+  private router = inject(Router);
 
   firstName: string = this.user.getUser().firstName;
   userType: UserType = parseInt(this.user.getUser().userType);
@@ -57,19 +61,27 @@ export class LayoutComponent {
       });
     }
   }
+
+  openDialog() {
+    const dialogComponent: ComponentType<
+      RegisterComponent | ApplyLeaveComponent
+    > = this.isUserHOD ? RegisterComponent : ApplyLeaveComponent;
+
+    this.dialog.open(dialogComponent, {
+      data: {
+        fromDialog: true,
+        userType: 'Teacher',
+        department: this.user.getUser().department,
+      },
+    });
+  }
+
+  logout() {
+    this.user.logout();
+    this.router.navigate(['/login']);
+  }
+
   get isUserHOD(): boolean {
     return this.userType === UserType.HOD;
-  }
-  openDialog() {
-    this.dialog.open(
-      this.isUserHOD ? (RegisterComponent as any) : ApplyLeaveComponent,
-      {
-        data: {
-          fromDialog: true,
-          userType: 'Teacher',
-          department: this.user.getUser().department,
-        },
-      }
-    );
   }
 }

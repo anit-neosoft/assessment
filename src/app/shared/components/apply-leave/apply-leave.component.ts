@@ -17,7 +17,15 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { ApplyLeaveService } from './services/apply-leave.service';
 import { UserService } from '../../services/user.service';
 import { SnackBarService } from '../../services/snackbar.service';
-import { MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-apply-leave',
@@ -31,6 +39,10 @@ import { MatDialogRef } from '@angular/material/dialog';
     MatButtonModule,
     CommonModule,
     MatDatepickerModule,
+    MatDialogActions,
+    MatDialogClose,
+    MatDialogContent,
+    MatDialogTitle,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './apply-leave.component.html',
@@ -59,7 +71,6 @@ export class ApplyLeaveComponent {
         actionText: 'X',
       });
       this.dialogRef.close();
-      // this.leaveForm.reset();
     });
     console.log(this.leaveForm.value);
   }
@@ -71,5 +82,8 @@ export class ApplyLeaveComponent {
       status: 'pending',
       user: this.user.getUser(),
     };
+  }
+  onCancelClick() {
+    this.dialogRef.close();
   }
 }
