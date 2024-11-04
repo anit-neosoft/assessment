@@ -1,0 +1,42 @@
+<form [formGroup]="leaveForm" (ngSubmit)="onSubmit()" class="flex-column m-1">
+  <mat-form-field appearance="fill">
+    <mat-label>Leave From Date</mat-label>
+    <input matInput [matDatepicker]="fromDatePicker" formControlName="fromDate">
+    <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #fromDatePicker></mat-datepicker>
+    @if (leaveForm.get('fromDate')?.hasError('required')) {
+    <mat-error>
+      Leave From Date is required
+    </mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Leave To Date</mat-label>
+    <input matInput [matDatepicker]="toDatePicker" formControlName="toDate">
+    <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #toDatePicker></mat-datepicker>
+    @if (leaveForm.get('toDate')?.hasError('required')) {
+    <mat-error>
+      Leave To Date is required
+    </mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Reason</mat-label>
+    <textarea matInput formControlName="reason"></textarea>
+    @if (leaveForm.get('reason')?.hasError('required')) {
+    <mat-error>
+      Reason is required
+    </mat-error>
+    }
+    @if (leaveForm.get('reason')?.hasError('minlength')) {
+    <mat-error>
+      Reason must be at least 10 characters long
+    </mat-error>
+    }
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit">Apply Leave</button>
+</form>

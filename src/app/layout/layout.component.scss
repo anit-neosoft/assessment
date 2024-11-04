@@ -3,13 +3,13 @@
 }
 
 .sidenav {
+  background: firebrick;
+  color: #fff !important;
   width: 200px;
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 1px;
 }
 
-.sidenav {
-  background: firebrick;
-  color: #fff;
-}
 .mat-toolbar {
   background: inherit;
 }

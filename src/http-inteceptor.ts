@@ -13,7 +13,9 @@ import { User, UserInput } from './app/shared/models/user.interface';
 
 // array in local storage for registered users
 const usersKey = 'neosoft-assessment-users';
+const leaveKey = 'neosoft-assessment-leaves';
 let users: User[] = JSON.parse(localStorage.getItem(usersKey)!) || [];
+let leaves: any[] = JSON.parse(localStorage.getItem(leaveKey)!) || [];
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -32,12 +34,14 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return authenticate();
         case url.endsWith('/users/register') && method === 'POST':
           return register();
-        case url.endsWith('/users') && method === 'GET':
-          return getUsers();
+        // case url.endsWith('/users') && method === 'GET':
+        //   return getUsers();
         case url.match(/\/users\/\d+$/) && method === 'GET':
           return getUserById();
-        case url.match(/\/users\/\d+$/) && method === 'DELETE':
-          return deleteUser();
+        // case url.match(/\/users\/\d+$/) && method === 'DELETE':
+        //   return deleteUser();
+        case url.endsWith('/apply-leave') && method === 'POST':
+          return applyLeave();
         default:
           // pass through any requests not handled above
           return next.handle(request);
@@ -71,11 +75,21 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       localStorage.setItem(usersKey, JSON.stringify(users));
       return ok({ message: 'User registered successfully' });
     }
-
-    function getUsers() {
-      if (!isLoggedIn()) return unauthorized();
-      return ok(users.map((x) => basicDetails(x)));
+    function applyLeave() {
+      const leave = body;
+      const newLeave = {
+        ...leave,
+        id: leaves.length ? Math.max(...leaves.map((x) => x.id)) + 1 : 1,
+      };
+      leaves.push(newLeave);
+      localStorage.setItem(leaveKey, JSON.stringify(leaves));
+      return ok({ message: 'Leave applied successfully' });
     }
+
+    // function getUsers() {
+    //   if (!isLoggedIn()) return unauthorized();
+    //   return ok(users.map((x) => basicDetails(x)));
+    // }
 
     function getUserById() {
       // if (!isLoggedIn()) return unauthorized();
@@ -84,13 +98,13 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return ok(basicDetails(user!));
     }
 
-    function deleteUser() {
-      if (!isLoggedIn()) return unauthorized();
+    // function deleteUser() {
+    //   if (!isLoggedIn()) return unauthorized();
 
-      users = users.filter((x) => x.id !== idFromUrl());
-      localStorage.setItem(usersKey, JSON.stringify(users));
-      return ok();
-    }
+    //   users = users.filter((x) => x.id !== idFromUrl());
+    //   localStorage.setItem(usersKey, JSON.stringify(users));
+    //   return ok();
+    // }
 
     // helper functions
 
@@ -119,7 +133,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         contact,
         department,
         email,
-        name,
+        firstName,
+        lastName,
         userType,
         username,
         profileImage,
@@ -129,16 +144,17 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         contact,
         department,
         email,
-        name,
+        lastName,
+        firstName,
         userType,
         username,
         profileImage,
       };
     }
 
-    function isLoggedIn() {
-      return headers.get('Authorization') === 'Bearer fake-jwt-token';
-    }
+    // function isLoggedIn() {
+    //   return headers.get('Authorization') === 'Bearer fake-jwt-token';
+    // }
 
     function idFromUrl() {
       const urlParts = url.split('/');

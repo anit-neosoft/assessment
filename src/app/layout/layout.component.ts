@@ -10,6 +10,9 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { Observable, map, shareReplay } from 'rxjs';
 import { UserService } from '../shared/services/user.service';
 import { UserType } from '../auth/models/user-type.enum';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ApplyLeaveComponent } from '../shared/components/apply-leave/apply-leave.component';
+import { RegisterComponent } from '../auth/components/register/register.component';
 
 @Component({
   selector: 'app-layout',
@@ -23,6 +26,7 @@ import { UserType } from '../auth/models/user-type.enum';
     AsyncPipe,
     RouterOutlet,
     RouterLink,
+    MatDialogModule,
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
@@ -30,32 +34,42 @@ import { UserType } from '../auth/models/user-type.enum';
 export class LayoutComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private user = inject(UserService);
+  readonly dialog = inject(MatDialog);
 
-  // userName$: Observable<string> = this.user
-  //   .getUser()
-  //   .pipe(map((user) => user?.name || ''));
+  firstName: string = this.user.getUser().firstName;
+  userType: UserType = parseInt(this.user.getUser().userType);
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
       map((result) => result.matches),
       shareReplay()
     );
-  userType!: string;
   sideBarLinks = [
     { name: 'Dashboard', route: '/dashboard' },
     { name: 'Leave Management', route: '/leave-management' },
   ];
-  // ngOnInit(): void {
-  //   this.user.getUser().subscribe((user) => {
-  //     if (user?.userType !== undefined) {
-  //       this.userType = UserType[parseInt(user.userType)];
-  //       if (this.userType === 'HOD') {
-  //         this.sideBarLinks.splice(1, 0, {
-  //           name: 'Staff Management',
-  //           route: '/staff-management',
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
+  ngOnInit(): void {
+    console.log(this.userType);
+    if (this.userType === UserType.HOD) {
+      this.sideBarLinks.splice(1, 0, {
+        name: 'Staff Management',
+        route: '/staff-management',
+      });
+    }
+  }
+  get isUserHOD(): boolean {
+    return this.userType === UserType.HOD;
+  }
+  openDialog() {
+    this.dialog.open(
+      this.isUserHOD ? (RegisterComponent as any) : ApplyLeaveComponent,
+      {
+        data: {
+          fromDialog: true,
+          userType: 'Teacher',
+          department: this.user.getUser().department,
+        },
+      }
+    );
+  }
 }

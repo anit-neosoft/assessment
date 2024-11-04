@@ -9,13 +9,21 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      @if (isHandset$ | async) {
-      <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
-      }
-      <span>Welcome </span>
+    <mat-toolbar color="primary" class="flex justify-space-between align-items-center">
+      <div class="flex-row align-items-center">
+        @if (isHandset$ | async) {
+        <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
+          <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+        </button>
+        }
+        <span>Welcome {{firstName}}</span>
+      </div>
+      <span>
+        <button mat-raised-button (click)="openDialog()">
+          <mat-icon>add</mat-icon>
+          <span>{{isUserHOD ? "Add Staff" : "Apply Leave"}}</span>
+        </button>
+      </span>
     </mat-toolbar>
     <router-outlet></router-outlet>
   </mat-sidenav-content>

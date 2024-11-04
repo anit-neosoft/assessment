@@ -1,7 +1,8 @@
 import { UserType } from '../../auth/models/user-type.enum';
 
 export interface UserInput {
-  name: string;
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   contact: number;
@@ -15,11 +16,4 @@ export interface User extends UserInput {
 }
 export interface UserWithToken extends User {
   token: string;
-}
-export interface ApplyLeave {
-  leaveType: string;
-  fromDate: string;
-  toDate: string;
-  reason: string;
-  status: string;
 }

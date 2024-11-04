@@ -1,4 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  Inject,
+  inject,
+  Input,
+  OnInit,
+  Optional,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -18,6 +25,7 @@ import { markAllAsTouched } from '../../../shared/helpers';
 import { UserType } from '../../models/user-type.enum';
 import { UserInput } from '../../../shared/models/user.interface';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register',
@@ -40,7 +48,20 @@ export class RegisterComponent implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   authService = inject(AuthService);
   snackbarService = inject(SnackBarService);
+  // @Optional()
+  // @Inject(MAT_DIALOG_DATA)
+  // dataFromDialog: {
+  //   fromDialog: boolean;
+  //   userType: string;
+  //   department: string;
+  // } | undefined;
   router = inject(Router);
+  dataFromDialog = inject<{
+    fromDialog: boolean;
+    userType: string;
+    department: string;
+  }>(MAT_DIALOG_DATA, { optional: true });
+
   buttons = [
     { label: 'HOD', route: '/register?userType=HOD' },
     { label: 'Teacher', route: '/register?userType=Teacher' },
@@ -61,7 +82,9 @@ export class RegisterComponent implements OnInit {
         Validators.pattern('^[0-9]{10}$'),
       ]),
     }),
-    department: new FormControl('', [Validators.required]),
+    department: new FormControl(this.dataFromDialog?.department || '', [
+      Validators.required,
+    ]),
     passwords: new FormGroup(
       {
         password: new FormControl('', [
@@ -76,6 +99,8 @@ export class RegisterComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    console.log('Data from dialog', this.dataFromDialog);
+
     this.activatedRoute.queryParams.subscribe((params) => {
       this.queryParam = params;
     });
@@ -87,7 +112,8 @@ export class RegisterComponent implements OnInit {
       return;
     }
     const user: UserInput = {
-      name: `${this.name.controls['firstName'].value} ${this.name.controls['lastName'].value}`,
+      firstName: this.name.controls['firstName'].value,
+      lastName: this.name.controls['lastName'].value,
       username: this.contact.controls['username'].value,
       email: this.contact.controls['email'].value,
       contact: this.contact.controls['contactNumber'].value,
@@ -102,6 +128,9 @@ export class RegisterComponent implements OnInit {
       this.snackbarService.open({
         type: response.message,
       });
+      if (this.dataFromDialog?.fromDialog) {
+        return;
+      }
       this.router.navigate(['/login']);
     });
   }
@@ -119,7 +148,12 @@ export class RegisterComponent implements OnInit {
     }
   }
   get userType() {
-    return this.queryParam?.['userType'];
+    console.log(
+      'User type',
+      this.queryParam?.['userType'],
+      this.dataFromDialog?.userType
+    );
+    return this.queryParam?.['userType'] ?? this.dataFromDialog?.userType;
   }
   get name() {
     return this.form.controls.name as FormGroup;
