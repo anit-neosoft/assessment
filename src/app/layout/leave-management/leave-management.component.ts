@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MtxGridColumn, MtxGridModule } from '@ng-matero/extensions/grid';
 import { UserService } from '../../shared/services/user.service';
 import { UserType } from '../../auth/models/user-type.enum';
+import { LeaveService } from './services/leave.service';
+import { ApplyLeave } from '../../shared/components/apply-leave/models/apply-leave';
 
 @Component({
   selector: 'app-leave-management',
@@ -10,10 +12,13 @@ import { UserType } from '../../auth/models/user-type.enum';
   templateUrl: './leave-management.component.html',
   styleUrl: './leave-management.component.scss',
 })
-export class LeaveManagementComponent {
+export class LeaveManagementComponent implements OnInit {
   private user = inject(UserService);
-  columns: MtxGridColumn[] = [
-    { header: 'Sr.No.', field: 'sr-no', showExpand: true },
+  private leaveManagement = inject(LeaveService);
+
+  data: ApplyLeave[] = [];
+  columns: MtxGridColumn<ApplyLeave>[] = [
+    { header: 'Sr.No.', field: 'srNo' },
     {
       header: 'Employee Name',
       field: 'name',
@@ -24,10 +29,20 @@ export class LeaveManagementComponent {
       field: 'email',
       hide: this.userType === UserType.Teacher,
     },
-    { header: 'From Date', field: 'from-date' },
-    { header: 'To Date', field: 'to-date' },
+    { header: 'From Date', field: 'fromDate' },
+    { header: 'To Date', field: 'toDate' },
     { header: 'Reason', field: 'reason' },
-    { header: 'Status', field: 'status', hide: this.userType === UserType.HOD },
+    {
+      header: 'Status',
+      field: 'status',
+      hide: this.userType === UserType.HOD,
+      formatter: (data) =>
+        data.status === 0
+          ? 'Pending'
+          : data.status === 1
+          ? 'Approved'
+          : 'Rejected',
+    },
     this.isUserTypeHod
       ? {
           header: 'Action',
@@ -40,7 +55,7 @@ export class LeaveManagementComponent {
               icon: 'check',
               tooltip: 'Approve',
               click: (record) => {
-                console.log('Approve', record);
+                this.approveLeave(record.leaveId!);
               },
             },
             {
@@ -49,7 +64,7 @@ export class LeaveManagementComponent {
               icon: 'close',
               tooltip: 'Reject',
               click: (record) => {
-                console.log('Reject', record);
+                this.rejectLeave(record.leaveId!);
               },
             },
           ],
@@ -62,10 +77,10 @@ export class LeaveManagementComponent {
             {
               type: 'icon',
               text: 'View',
-              icon: 'view',
+              icon: 'visibility',
               tooltip: 'View',
               click: (record) => {
-                console.log('View', record);
+                this.viewLeave(record);
               },
             },
           ],
@@ -76,5 +91,46 @@ export class LeaveManagementComponent {
   }
   get isUserTypeHod() {
     return this.userType === UserType.HOD;
+  }
+  get userDepartment() {
+    return this.user.getUser().department;
+  }
+  getTableDetailsForHod() {
+    this.leaveManagement
+      .getLeaveManagementDetailForHod(this.userDepartment)
+      .subscribe((data) => {
+        this.data = data;
+        console.log(data);
+      });
+  }
+  approveLeave(leaveId: number) {
+    this.leaveManagement.approveLeave(leaveId).subscribe((data) => {
+      console.log(data);
+      this.getTableDetailsForHod();
+    });
+  }
+  rejectLeave(leaveId: number) {
+    this.leaveManagement.rejectLeave(leaveId).subscribe((data) => {
+      console.log(data);
+      this.getTableDetailsForHod();
+    });
+  }
+  getTableDetailsForTeacher() {
+    this.leaveManagement
+      .getLeaveManagementDetailForTeacher(this.user.getUser().id)
+      .subscribe((data) => {
+        this.data = data;
+        console.log(data);
+      });
+  }
+  ngOnInit(): void {
+    if (this.userType === UserType.HOD) {
+      this.getTableDetailsForHod();
+      return;
+    }
+    this.getTableDetailsForTeacher();
+  }
+  viewLeave(leaves: ApplyLeave) {
+    console.log('View Leave', leaves);
   }
 }

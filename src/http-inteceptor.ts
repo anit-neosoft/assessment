@@ -14,6 +14,7 @@ import {
   ApplyLeave,
   LeaveStatus,
 } from './app/shared/components/apply-leave/models/apply-leave';
+import { UserType } from './app/auth/models/user-type.enum';
 
 // array in local storage for registered users
 const usersKey = 'neosoft-assessment-users';
@@ -47,7 +48,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         case url.endsWith('/apply-leave') && method === 'POST':
           return applyLeave();
         case url.match('/leave-management/hod') && method === 'POST':
-          return getLeaveManagementDetail();
+          return getLeaveManagementDetailForHod();
+        case url.endsWith('/leave-management/approve') && method === 'POST':
+          return approveLeave();
+        case url.endsWith('/leave-management/reject') && method === 'POST':
+          return rejectLeave();
+        case url.endsWith('/leave-management/teacher') && method === 'POST':
+          return getLeaveManagementDetailForTeacher();
+        case url.endsWith('/hod/teachers') && method === 'POST':
+          return getTeacherForCurrentHod();
         default:
           // pass through any requests not handled above
           return next.handle(request);
@@ -55,6 +64,31 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     }
 
     // route functions
+
+    function getTeacherForCurrentHod() {
+      const { department } = body;
+      console.log('Department', department);
+
+      const teachers = users
+        .filter(
+          (x) =>
+            x.department === department &&
+            parseInt(x.userType) === UserType.Teacher
+        )
+        .map((teacher, index) => {
+          return {
+            srNo: index + 1,
+            id: teacher.id,
+            name: `${teacher.firstName} ${teacher.lastName}`,
+            username: teacher.username,
+            email: teacher.email,
+            mobile: teacher.contact,
+            profileImage: teacher.profileImage,
+            basicDetails: basicDetails(teacher),
+          };
+        });
+      return ok(teachers);
+    }
 
     function authenticate() {
       const { username, password } = body;
@@ -93,31 +127,67 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       localStorage.setItem(leaveKey, JSON.stringify(leaves));
       return ok({ message: 'Leave applied successfully' });
     }
-    function getLeaveManagementDetail() {
+    function getLeaveManagementDetailForHod() {
       const { department } = body;
-      const pendingLeaves = leaves.filter(
-        (x) => x.department === department && x.status === LeaveStatus.Pending
-      );
-      pendingLeaves.forEach((leave) => {
-        const user = users.find((x) => x.id === leave.userId);
-        return {
-          name: `${user?.firstName} ${user?.lastName}`,
-          email: user?.email,
-          fromDate: leave.fromDate,
-          toDate: leave.toDate,
-          reason: leave.reason,
-          status: leave.status,
-          leaveId: leave.leaveId,
-          userId: leave.userId,
-        };
-      });
+      console.log('Department', department);
+
+      const pendingLeaves = leaves
+        .filter(
+          (x) => x.department === department && x.status === LeaveStatus.Pending
+        )
+        .map((leave, index) => {
+          const user = users.find((x) => x.id === leave.userId);
+
+          return {
+            srNo: index + 1, // Add the serial number field
+            name: `${user?.firstName} ${user?.lastName}`,
+            email: user?.email,
+            fromDate: leave.fromDate,
+            toDate: leave.toDate,
+            reason: leave.reason,
+            status: leave.status,
+            leaveId: leave.leaveId,
+            userId: leave.userId,
+          };
+        });
+
       return ok(pendingLeaves);
     }
+    function getLeaveManagementDetailForTeacher() {
+      // I want to return srno, fromDate, toDate, reason, status of the leaves applied by the teacher
+      const { id } = body;
+      console.log('ID', id);
+      const teacherLeaves = leaves
+        .filter((x) => x.userId === id)
+        .map((leave, index) => {
+          return {
+            srNo: index + 1,
+            fromDate: leave.fromDate,
+            toDate: leave.toDate,
+            reason: leave.reason,
+            status: leave.status,
+          };
+        });
+      return ok(teacherLeaves);
+    }
+    function approveLeave() {
+      const { id } = body;
+      console.log('Leave ID', id);
 
-    // function getUsers() {
-    //   if (!isLoggedIn()) return unauthorized();
-    //   return ok(users.map((x) => basicDetails(x)));
-    // }
+      const leave = leaves.find((x) => x.leaveId === id);
+      if (!leave) return error('Leave not found');
+      leave.status = LeaveStatus.Approved;
+      localStorage.setItem(leaveKey, JSON.stringify(leaves));
+      return ok();
+    }
+    function rejectLeave() {
+      const { id } = body;
+      const leave = leaves.find((x) => x.leaveId === id);
+      if (!leave) return error('Leave not found');
+      leave.status = LeaveStatus.Rejected;
+      localStorage.setItem(leaveKey, JSON.stringify(leaves));
+      return ok();
+    }
 
     function getUserById() {
       const user = users.find((x) => x.id === idFromUrl());
@@ -175,10 +245,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         profileImage,
       };
     }
-
-    // function isLoggedIn() {
-    //   return headers.get('Authorization') === 'Bearer fake-jwt-token';
-    // }
 
     function idFromUrl() {
       const urlParts = url.split('/');
