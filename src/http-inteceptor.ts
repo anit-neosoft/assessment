@@ -28,7 +28,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const { url, method, headers, body } = request;
+    const { url, method, body } = request;
     console.log('Request', request);
 
     return handleRoute();
@@ -39,8 +39,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return authenticate();
         case url.endsWith('/users/register') && method === 'POST':
           return register();
-        // case url.endsWith('/users') && method === 'GET':
-        //   return getUsers();
         case url.match(/\/users\/\d+$/) && method === 'GET':
           return getUserById();
         case url.match(/^\/hod\/teacher\/\d+$/) && method === 'DELETE':
@@ -57,14 +55,39 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return getLeaveManagementDetailForTeacher();
         case url.endsWith('/hod/teachers') && method === 'POST':
           return getTeacherForCurrentHod();
+        case url.endsWith('/hod/dashboard') && method === 'POST':
+          return getHodDashboardData();
+        case url.endsWith('/teacher/dashboard') && method === 'POST':
+          return getTeacherDashboardData();
         default:
-          // pass through any requests not handled above
           return next.handle(request);
       }
     }
 
-    // route functions
-
+    function getTeacherDashboardData() {
+      const { id } = body;
+      console.log('ID', id);
+      const totalLeaves = leaves.filter((x) => x.userId === id).length;
+      const totalApprovedLeaves = leaves.filter(
+        (x) => x.userId === id && x.status === LeaveStatus.Approved
+      ).length;
+      const totalRejectedLeaves = leaves.filter(
+        (x) => x.userId === id && x.status === LeaveStatus.Rejected
+      ).length;
+      return ok({ totalLeaves, totalApprovedLeaves, totalRejectedLeaves });
+    }
+    function getHodDashboardData() {
+      const { id } = body;
+      console.log('ID', id);
+      const department = users.find((x) => x.id === id)?.department;
+      const totalStaffMembers = users.filter(
+        (x) =>
+          x.department === department &&
+          parseInt(x.userType) === UserType.Teacher
+      ).length;
+      console.log('Total Staff Members', totalStaffMembers);
+      return ok({ totalStaffMembers });
+    }
     function getTeacherForCurrentHod() {
       const { department } = body;
       console.log('Department', department);
@@ -200,8 +223,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return ok();
     }
 
-    // helper functions
-
     function ok(body?: any) {
       return of(new HttpResponse({ status: 200, body })).pipe(delay(500)); // delay observable to simulate server api call
     }
@@ -212,13 +233,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         delay(500),
         dematerialize()
       ); // call materialize and dematerialize to ensure delay even if an error is thrown (https://github.com/Reactive-Extensions/RxJS/issues/648);
-    }
-
-    function unauthorized() {
-      return throwError(() => ({
-        status: 401,
-        error: { message: 'Unauthorized' },
-      })).pipe(materialize(), delay(500), dematerialize());
     }
 
     function basicDetails(user: User) {

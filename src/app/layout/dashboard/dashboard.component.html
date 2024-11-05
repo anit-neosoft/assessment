@@ -1,12 +1,6 @@
 <div class="flex flex-row justify-content-center">
-  @if(userType === 'HOD'){
-  @for (card of hodStatCards; track card) {
-  <app-stat-card />
-  }
-  }
-  @else {
-  @for (card of staffStatCards; track card) {
-  <app-stat-card />
-  }
+
+  @for (card of statCards; track card.heading) {
+  <app-stat-card [heading]="card.heading" [value]="card.value" />
   }
 </div>

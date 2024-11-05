@@ -9,37 +9,49 @@ import { MatMenuModule } from '@angular/material/menu';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { UserService } from '../../shared/services/user.service';
 import { UserType } from '../../auth/models/user-type.enum';
+import { DashboardService } from './services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    AsyncPipe,
-    MatGridListModule,
-    MatMenuModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    StatCardComponent,
-  ],
+  imports: [StatCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private user = inject(UserService);
-  hodStatCards = ['Total Staff Members'];
-  staffStatCards = [
-    'Total Leaves',
-    'Total Approved Leaves',
-    'Total Rejected Leaves',
-  ];
-  userType: string = UserType[parseInt(this.user.getUser().userType)];
+  private dashboardService = inject(DashboardService);
 
-  // ngOnInit(): void {
-  //   this.user.getUser().subscribe((user) => {
-  //     if (user?.userType !== undefined) {
-  //       this.userType = UserType[parseInt(user.userType)];
-  //     }
-  //   });
-  // }
+  statCards: { heading: string; value: number }[] = [];
+
+  ngOnInit() {
+    if (parseInt(this.userType) === UserType.HOD) {
+      this.getHodStatCardData();
+    } else {
+      this.getStaffStatCardData();
+    }
+  }
+  get userType() {
+    return this.user.getUser().userType;
+  }
+  getHodStatCardData() {
+    this.dashboardService
+      .getHodDashboardData(this.user.getUser().id)
+      .subscribe((data) => {
+        this.statCards = [
+          { heading: 'Total Staff Members', value: data.totalStaffMembers },
+        ];
+      });
+  }
+  getStaffStatCardData() {
+    this.dashboardService
+      .getTeacherDashboardData(this.user.getUser().id)
+      .subscribe((data) => {
+        this.statCards = [
+          { heading: 'Total Leaves', value: data.totalLeaves },
+          { heading: 'Total Approved', value: data.totalApprovedLeaves },
+          { heading: 'Total Rejected Leaves', value: data.totalRejectedLeaves },
+        ];
+      });
+  }
 }
