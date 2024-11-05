@@ -3,6 +3,9 @@ import { MtxGridColumn, MtxGridModule } from '@ng-matero/extensions/grid';
 import { UserType } from '../../auth/models/user-type.enum';
 import { UserService } from '../../shared/services/user.service';
 import { StaffService } from './services/staff.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ViewDialogComponent } from '../../shared/components/view-dialog/view-dialog.component';
+import { SnackBarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-staff-management',
@@ -14,6 +17,9 @@ import { StaffService } from './services/staff.service';
 export class StaffManagementComponent implements OnInit {
   private user = inject(UserService);
   private staffService = inject(StaffService);
+  private dialog = inject(MatDialog);
+  private snackbar = inject(SnackBarService);
+
   columns: MtxGridColumn[] = [
     { header: 'Sr.No.', field: 'srNo' },
     {
@@ -37,6 +43,7 @@ export class StaffManagementComponent implements OnInit {
           icon: 'visibility',
           tooltip: 'View',
           click: (record) => {
+            this.openStaffDetails(record);
             console.log('View', record);
           },
         },
@@ -46,6 +53,7 @@ export class StaffManagementComponent implements OnInit {
           icon: 'delete',
           tooltip: 'Delete',
           click: (record) => {
+            this.deleteStaff(record);
             console.log('Delete', record);
           },
         },
@@ -69,5 +77,21 @@ export class StaffManagementComponent implements OnInit {
         this.data = res;
         console.log('Response', res);
       });
+  }
+  openStaffDetails(teacher: any) {
+    this.dialog.open(ViewDialogComponent, {
+      data: teacher.basicDetails,
+    });
+    console.log('View Leave', teacher);
+  }
+  deleteStaff(teacher: any) {
+    this.staffService.deleteTeacher(teacher.id).subscribe((_res) => {
+      this.snackbar.open({
+        type: 'Teacher deleted successfully',
+        actionText: 'X',
+      });
+      this.getTableDetailsForHod();
+    });
+    console.log('Delete', teacher);
   }
 }

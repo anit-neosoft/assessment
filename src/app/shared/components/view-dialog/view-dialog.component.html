@@ -1,0 +1,10 @@
+<div mat-dialog-content>
+  @for (key of dataKey; track $index) {
+  <div>
+    <strong>{{ key }}:</strong> {{ data[key] }}
+  </div>
+  }
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close>OK</button>
+</div>

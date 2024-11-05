@@ -4,6 +4,9 @@ import { UserService } from '../../shared/services/user.service';
 import { UserType } from '../../auth/models/user-type.enum';
 import { LeaveService } from './services/leave.service';
 import { ApplyLeave } from '../../shared/components/apply-leave/models/apply-leave';
+import { MatDialog } from '@angular/material/dialog';
+import { ViewDialogComponent } from '../../shared/components/view-dialog/view-dialog.component';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-leave-management',
@@ -15,6 +18,7 @@ import { ApplyLeave } from '../../shared/components/apply-leave/models/apply-lea
 export class LeaveManagementComponent implements OnInit {
   private user = inject(UserService);
   private leaveManagement = inject(LeaveService);
+  readonly dialog = inject(MatDialog);
 
   data: ApplyLeave[] = [];
   columns: MtxGridColumn<ApplyLeave>[] = [
@@ -29,8 +33,16 @@ export class LeaveManagementComponent implements OnInit {
       field: 'email',
       hide: this.userType === UserType.Teacher,
     },
-    { header: 'From Date', field: 'fromDate' },
-    { header: 'To Date', field: 'toDate' },
+    {
+      header: 'From Date',
+      field: 'fromDate',
+      formatter: (data) => formatDate(data.fromDate, 'dd-MM-yyyy', 'en-US'),
+    },
+    {
+      header: 'To Date',
+      field: 'toDate',
+      formatter: (data) => formatDate(data.toDate, 'dd-MM-yyyy', 'en-US'),
+    },
     { header: 'Reason', field: 'reason' },
     {
       header: 'Status',
@@ -38,10 +50,10 @@ export class LeaveManagementComponent implements OnInit {
       hide: this.userType === UserType.HOD,
       formatter: (data) =>
         data.status === 0
-          ? 'Pending'
-          : data.status === 1
           ? 'Approved'
-          : 'Rejected',
+          : data.status === 1
+          ? 'Rejected'
+          : 'Pending',
     },
     this.isUserTypeHod
       ? {
@@ -131,6 +143,9 @@ export class LeaveManagementComponent implements OnInit {
     this.getTableDetailsForTeacher();
   }
   viewLeave(leaves: ApplyLeave) {
+    this.dialog.open(ViewDialogComponent, {
+      data: leaves,
+    });
     console.log('View Leave', leaves);
   }
 }

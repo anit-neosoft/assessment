@@ -43,8 +43,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         //   return getUsers();
         case url.match(/\/users\/\d+$/) && method === 'GET':
           return getUserById();
-        // case url.match(/\/users\/\d+$/) && method === 'DELETE':
-        //   return deleteUser();
+        case url.match(/^\/hod\/teacher\/\d+$/) && method === 'DELETE':
+          return deleteUser();
         case url.endsWith('/apply-leave') && method === 'POST':
           return applyLeave();
         case url.match('/leave-management/hod') && method === 'POST':

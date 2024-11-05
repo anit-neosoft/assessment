@@ -24,4 +24,17 @@ export class StaffService {
       )
     );
   }
+  deleteTeacher(id: number) {
+    return this.http.delete(`/hod/teacher/${id}`).pipe(
+      catchError((error: { message: string }) =>
+        throwError(() => {
+          this.snackbar.open({
+            type: 'There was some error while deleting the teacher',
+            actionText: 'X',
+          });
+          return error;
+        })
+      )
+    );
+  }
 }
